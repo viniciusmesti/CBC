@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authController } from '../controllers/auth.controller';
 const router = Router();
 
 /**
@@ -63,5 +64,7 @@ router.post('/auth', (req, res) => {
     },
   });
 });
+
+router.post('/auth', authController);
 
 export default router;

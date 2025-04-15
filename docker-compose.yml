@@ -1,26 +1,21 @@
-version: '3'
 services:
   backend:
     build: ./backend
     ports:
-      - '5000:5000'
+      - "5000:5000"
     environment:
       - NODE_ENV=development
-      - DB_HOST=postgres   # Esse valor deve ser o nome do serviço do banco de dados
+      - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=cbc
     depends_on:
       - postgres
-
   frontend:
     build: ./frontend
     ports:
-      - '3000:3000'
-    environment:
-      - NODE_ENV=development
-
+      - "3000:3000"
   postgres:
     image: postgres:15.3-alpine
     restart: always
@@ -29,7 +24,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: cbc
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
