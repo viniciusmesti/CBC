@@ -5,6 +5,13 @@ import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 
+// Importação das rotas (que serão implementadas abaixo)
+import authRoutes from './routes/auth';
+import conversationRoutes from './routes/conversations';
+import messageRoutes from './routes/messages';
+import { AppDataSource } from './config/data-source';
+import { processMessages } from './services/messageWorker';
+
 dotenv.config();
 
 const app = express();
@@ -30,17 +37,37 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./src/routes/*.ts', './src/models/*.ts'], // ajuste os caminhos conforme necessário
+  // Ajuste os caminhos conforme a localização dos seus arquivos com os comentários JSDoc
+  apis: ['./src/routes/*.ts', './src/models/*.ts'],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Rota de teste
+// Rotas básicas
 app.get('/', (req, res) => {
   res.send('Backend do CBC está funcionando!');
 });
 
+// Uso das rotas da API
+app.use('/api', authRoutes);
+app.use('/api', conversationRoutes);
+app.use('/api', messageRoutes);
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
 });
+
+
+AppDataSource.initialize()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Servidor rodando na porta ${PORT}`);
+      console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+    });
+  })
+  .catch((error) => console.error('Erro ao conectar ao banco de dados', error));
+
+  setInterval(processMessages, 5000);
+  
