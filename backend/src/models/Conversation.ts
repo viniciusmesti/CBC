@@ -5,26 +5,26 @@ import { Message } from './Message';
 @Entity()
 export class Conversation {
   @PrimaryGeneratedColumn('uuid')
-  id: string | undefined;
+  id!: string;
 
   @ManyToOne(() => Client, client => client.conversations)
-  client: Client | undefined;
+  client!: Client;
 
   @Column()
-  recipientId: string | undefined;
+  recipientId!: string;
 
   @Column()
-  recipientName: string | undefined;
+  recipientName!: string;
 
   @Column({ nullable: true })
-  lastMessageContent: string | undefined;
+  lastMessageContent!: string;
 
   @Column({ type: 'timestamp', nullable: true })
-  lastMessageTime: Date | undefined;
+  lastMessageTime!: Date;
 
   @Column({ default: 0 })
-  unreadCount: number | undefined;
+  unreadCount!: number;
 
   @OneToMany(() => Message, message => message.conversation)
-  messages: Message[] | undefined;
+  messages!: Message[];
 }

@@ -4,29 +4,29 @@ import { Conversation } from './Conversation';
 @Entity()
 export class Client {
   @PrimaryGeneratedColumn('uuid')
-  id: string | undefined;
+  id!: string;
 
   @Column()
-  name: string | undefined;
+  name!: string;
 
   @Column({ unique: true })
-  documentId: string | undefined;
+  documentId!: string;
 
   @Column()
-  documentType: 'CPF' | 'CNPJ' | undefined;
+  documentType!: 'CPF' | 'CNPJ';
 
   @Column()
-  planType: 'prepaid' | 'postpaid' | undefined;
+  planType!: 'prepaid' | 'postpaid';
 
   @Column({ default: true })
-  active: boolean | undefined;
+  active!: boolean;
 
   @Column('float', { nullable: true })
-  balance?: number; // Disponível para pré-pago
+  balance?: number; // Disponível para clientes no plano pré-pago
 
   @Column('float', { nullable: true })
-  limit?: number;   // Disponível para pós-pago
+  limit?: number;   // Disponível para clientes no plano pós-pago
 
   @OneToMany(() => Conversation, conversation => conversation.client)
-  conversations: Conversation[] | undefined;
+  conversations!: Conversation[];
 }

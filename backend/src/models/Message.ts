@@ -4,27 +4,26 @@ import { Conversation } from './Conversation';
 @Entity()
 export class Message {
   @PrimaryGeneratedColumn('uuid')
-  id: string | undefined;
+  id!: string;
 
   @ManyToOne(() => Conversation, conversation => conversation.messages)
-  conversation: Conversation | undefined;
+  conversation!: Conversation;
 
-  @Column()
-  content: string | undefined;
+  @Column({ type: 'text' }) 
+  content!: string;
 
-  // Utilizamos o tipo JSON para armazenar os dados do remetente
   @Column('json')
-  sentBy: { id: string; type: 'client' | 'user'; } | undefined;
+  sentBy!: { id: string; type: 'client' | 'user' };
 
   @Column({ type: 'timestamp' })
-  timestamp: Date | undefined;
+  timestamp!: Date;
 
-  @Column()
-  priority: 'normal' | 'urgent' | undefined;
+  @Column({ type: 'varchar' })
+  priority!: 'normal' | 'urgent';
 
-  @Column()
-  status: 'queued' | 'processing' | 'sent' | 'delivered' | 'read' | 'failed' | undefined;
+  @Column({ type: 'varchar' })
+  status!: 'queued' | 'processing' | 'sent' | 'delivered' | 'read' | 'failed';
 
   @Column('float')
-  cost: number | undefined;
+  cost!: number;
 }
