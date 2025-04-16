@@ -1,5 +1,9 @@
 import { Router } from 'express';
 import { authController } from '../controllers/auth.controller';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret';
+
 const router = Router();
 
 /**
@@ -7,7 +11,7 @@ const router = Router();
  * /api/auth:
  *   post:
  *     summary: Autentica o usuário.
- *     description: Recebe documentId e documentType e retorna os dados do cliente e um token.
+ *     description: Retorna um token JWT e dados do cliente autenticado.
  *     requestBody:
  *       required: true
  *       content:
@@ -31,40 +35,9 @@ const router = Router();
  *                 token:
  *                   type: string
  *                 client:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     name:
- *                       type: string
- *                     documentId:
- *                       type: string
- *                     documentType:
- *                       type: string
- *                     planType:
- *                       type: string
- *                     active:
- *                       type: boolean
- *                     balance:
- *                       type: number
+ *                   $ref: '#/components/schemas/Client'
  */
-router.post('/auth', (req, res) => {
-  const { documentId, documentType } = req.body;
-  // Simulação da autenticação (em um cenário real, validar e consultar o cliente no BD)
-  res.json({
-    token: 'dummy-token',
-    client: {
-      id: 'client1',
-      name: 'Dummy Client',
-      documentId,
-      documentType,
-      planType: 'prepaid',
-      active: true,
-      balance: 100.0,
-    },
-  });
-});
-
 router.post('/auth', authController);
+
 
 export default router;

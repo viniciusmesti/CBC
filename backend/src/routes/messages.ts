@@ -1,4 +1,7 @@
 import { Router } from 'express';
+import { authenticateToken } from '../middleware/auth.middleware';
+import { sendMessageHandler } from '../controllers/message.controller'; // você deve ter isso implementado
+
 const router = Router();
 
 /**
@@ -6,7 +9,11 @@ const router = Router();
  * /api/messages:
  *   post:
  *     summary: Envia uma nova mensagem.
- *     description: Permite enviar uma mensagem especificando conversationId ou recipientId, content e priority.
+ *     description: Cria uma nova mensagem e enfileira para envio.
+ *     tags:
+ *       - Mensagens
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -25,7 +32,7 @@ const router = Router();
  *                 enum: [normal, urgent]
  *     responses:
  *       200:
- *         description: Mensagem enfileirada com sucesso.
+ *         description: Mensagem criada e enfileirada.
  *         content:
  *           application/json:
  *             schema:
@@ -41,23 +48,11 @@ const router = Router();
  *                   type: string
  *                 cost:
  *                   type: number
+ *                 currentBalance:
+ *                   type: number
  */
-router.post('/messages', (req, res) => {
-  const { conversationId, recipientId, content, priority } = req.body;
-  // Simulação da criação de uma mensagem
-  const message = {
-    id: 'msg' + Math.floor(Math.random() * 1000),
-    conversationId: conversationId || 'conv-new',
-    content,
-    sentBy: { id: 'client1', type: 'client' },
-    timestamp: new Date().toISOString(),
-    priority,
-    status: 'queued',
-    cost: priority === 'urgent' ? 0.5 : 0.25,
-    estimatedDelivery: new Date(Date.now() + 3000).toISOString(),
-  };
-  // Aqui, em um cenário real, a mensagem seria enfileirada para processamento
-  res.json(message);
-});
+
+
+router.post('/messages', authenticateToken, sendMessageHandler);
 
 export default router;

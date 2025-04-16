@@ -2,26 +2,21 @@ import { messageQueue } from './messageQueue';
 import { AppDataSource } from '../config/data-source';
 import { Message } from '../models/Message';
 
-export const processMessages = async () => {
-  const item = messageQueue.dequeue();
-  if (!item) return;
+export async function startMessageWorker() {
+  setInterval(async () => {
+    const messageId = messageQueue.dequeue();
+    if (!messageId) return;
 
-  try {
-    const messageRepository = AppDataSource.getRepository(Message);
-    const msg = await messageRepository.findOneBy({ id: item.messageId });
-    if (msg) {
-      // Atualiza status para "processing"
-      msg.status = 'processing';
-      await messageRepository.save(msg);
-      
-      // Simulação de processamento com atraso (por exemplo, 3 segundos)
-      setTimeout(async () => {
-        msg.status = 'sent';
-        await messageRepository.save(msg);
-        console.log(`Mensagem ${msg.id} processada e enviada.`);
-      }, 3000);
+    const messageRepo = AppDataSource.getRepository(Message);
+    const message = await messageRepo.findOneBy({ id: messageId });
+    if (!message) {
+      console.warn(`Mensagem ${messageId} não encontrada`);
+      return;
     }
-  } catch (error) {
-    console.error('Erro ao processar mensagem:', error);
-  }
-};
+
+    // Simula envio
+    message.status = 'sent';
+    await messageRepo.save(message);
+    console.log(`✅ Mensagem ${messageId} enviada com sucesso!`);
+  }, 1000); // processa 1 por segundo
+}

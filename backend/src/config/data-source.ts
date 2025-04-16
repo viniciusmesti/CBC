@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { Client } from '../models/Client';
 import { Conversation } from '../models/Conversation';
 import { Message } from '../models/Message';
+import { Transaction } from '../models/Transaction';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -13,7 +14,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || 'cbc',
   synchronize: true, // Em produção, utilize migrações
   logging: false,
-  entities: [Client, Conversation, Message],
+  entities: [Client, Conversation, Message, Transaction],
   migrations: [],
   subscribers: [],
 });

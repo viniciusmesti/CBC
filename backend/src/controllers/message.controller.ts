@@ -1,19 +1,14 @@
-import { Request, Response } from 'express';
-// Importe a função de envio de mensagem do serviço
+import { Response } from 'express';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { sendMessage } from '../services/message.service';
 
-/**
- * Controller para envio de mensagem.
- * Recebe conversationId (ou recipientId), content e priority e retorna o status da mensagem.
- */
-export const sendMessageController = async (req: Request, res: Response): Promise<void> => {
+export const sendMessageHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { conversationId, recipientId, content, priority } = req.body;
-    // Chama o serviço que processa e enfileira a mensagem
-    const messageResponse = await sendMessage({ conversationId, recipientId, content, priority });
-    res.status(200).json(messageResponse);
+    const clientId = req.clientId!;
+    const response = await sendMessage({ ...req.body, clientId });
+    res.status(200).json(response);
   } catch (error) {
-    console.error('Error in sendMessageController:', error);
-    res.status(500).json({ error: 'Erro interno no servidor ao enviar mensagem' });
+    console.error('Erro ao enviar mensagem:', error);
+    res.status(500).json({ error: 'Erro ao enviar mensagem' });
   }
 };
