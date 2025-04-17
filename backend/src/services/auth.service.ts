@@ -1,5 +1,8 @@
 import { Client } from "../models/Client";
 import { AppDataSource } from "../config/data-source";
+import * as jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "super-secret";
 
 export interface AuthResponse {
   token: string;
@@ -16,27 +19,37 @@ export interface AuthResponse {
 }
 
 export async function authenticateClient(
-  documentId: string, 
+  documentId: string,
   documentType: 'CPF' | 'CNPJ'
 ): Promise<AuthResponse> {
-  const clientRepository = AppDataSource.getRepository(Client);
+  console.log("🔑 authenticateClient()", { documentId, documentType });
 
-  // Tenta encontrar um cliente existente
-  let client = await clientRepository.findOneBy({ documentId, documentType });
-  if (!client) {
-    // Se não existir, cria um novo cliente com valores padrão
-    client = clientRepository.create({
-      name: 'Novo Cliente',
-      documentId,
-      documentType,
-      planType: 'prepaid', // valor padrão; pode ser 'postpaid' conforme regra
-      active: true,
-      balance: 100.0, // valor de saldo padrão para pré-pago
-    });
-    client = await clientRepository.save(client);
+  try {
+    const clientRepo = AppDataSource.getRepository(Client);
+
+    let client = await clientRepo.findOneBy({ documentId, documentType });
+    console.log("🏷️  client found:", client);
+
+    if (!client) {
+      console.log("➕ Creating new client");
+      client = clientRepo.create({
+        name: 'Novo Cliente',
+        documentId,
+        documentType,
+        planType: 'prepaid',
+        active: true,
+        balance: 100.0,
+      });
+      client = await clientRepo.save(client);
+      console.log("💾 New client saved:", client);
+    }
+
+    const token = jwt.sign({ clientId: client.id }, JWT_SECRET, { expiresIn: '1h' });
+    console.log("🛡️  JWT generated:", token);
+
+    return { token, client };
+  } catch (err: any) {
+    console.error("❌ Error inside authenticateClient:", err);
+    throw err;  // propaga para o controller, que já imprime
   }
-
-  // Gera um token dummy (em produção, utilize JWT ou outra estratégia)
-  const token = 'dummy-token-' + client.id;
-  return { token, client };
 }

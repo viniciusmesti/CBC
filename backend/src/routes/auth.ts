@@ -1,8 +1,5 @@
 import { Router } from 'express';
 import { authController } from '../controllers/auth.controller';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'super-secret';
 
 const router = Router();
 

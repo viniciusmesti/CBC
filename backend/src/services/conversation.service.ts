@@ -3,27 +3,33 @@ import { AppDataSource } from "../config/data-source";
 import { Conversation } from "../models/Conversation";
 import { Message } from "../models/Message";
 
-export async function getClientConversations(req: Request): Promise<Conversation[]> {
-  // Para fins de teste, esperamos que o ID do cliente esteja no header "client-id"
-  const clientId = req.headers["client-id"] as string;
-  if (!clientId) throw new Error("Header 'client-id' ausente");
-
-  const conversationRepo = AppDataSource.getRepository(Conversation);
-  // Busca todas as conversas relacionadas ao cliente (utilizando join para trazer as informações se necessário)
-  const conversations = await conversationRepo.find({
+export async function getClientConversations(
+  clientId: string
+): Promise<Conversation[]> {
+  const repo = AppDataSource.getRepository(Conversation);
+  return repo.find({
     where: { client: { id: clientId } },
-    relations: ["client"],
+    relations: ['client'],
   });
-  return conversations;
 }
 
-export async function getConversationMessages(conversationId: string): Promise<Message[]> {
-  const messageRepo = AppDataSource.getRepository(Message);
-  // Retorna mensagens da conversa ordenadas pela timestamp
-  const messages = await messageRepo.find({
-    where: { conversation: { id: conversationId } },
-    order: { timestamp: "ASC" },
-    relations: ["conversation"],
-  });
+export async function getConversationMessages(
+  clientId: string,
+  conversationId: string
+): Promise<Message[]> {
+  // Garante que a conversa pertence ao client antes de buscar mensagens
+  const repo = AppDataSource.getRepository(Message);
+
+  const messages = await repo
+    .createQueryBuilder("message")
+    .innerJoinAndSelect(
+      "message.conversation",
+      "conv",
+      "conv.id = :conversationId AND conv.clientId = :clientId",
+      { conversationId, clientId }
+    )
+    .orderBy("message.timestamp", "ASC")
+    .getMany();
+
   return messages;
 }

@@ -81,11 +81,6 @@ app.use('/api', messageRoutes);
 app.use('/api', transactionRoutes);
 
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-  console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
-});
-
 AppDataSource.initialize()
   .then(() => {
     console.log('📦 Banco de dados conectado com sucesso!');
@@ -95,5 +90,5 @@ AppDataSource.initialize()
     });
   })
   .catch((err) => {
-    console.error('Erro ao conectar no banco de dados:', err);
+    console.error('❌ Erro ao conectar no banco de dados:', err);
   });
