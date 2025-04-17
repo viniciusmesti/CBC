@@ -15,7 +15,7 @@ export interface SendMessageRequest {
 
 export interface SendMessageResponse {
   id:                string;
-  status:            'queued';
+  status:            'sent';
   timestamp:         string;
   estimatedDelivery: string;
   cost:              number;
@@ -86,7 +86,7 @@ export async function sendMessage({
     sentBy: { id: clientId, type: 'client' },
     timestamp: new Date(),
     priority,
-    status: 'queued',
+    status: 'sent',
     cost,
   });
   const saved = await messageRepo.save(message);
@@ -94,7 +94,7 @@ export async function sendMessage({
 
   return {
     id: saved.id,
-    status: 'queued',
+    status: 'sent',
     timestamp: saved.timestamp.toISOString(),
     estimatedDelivery: new Date(Date.now() + 3000).toISOString(),
     cost,

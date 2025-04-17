@@ -14,6 +14,8 @@ export default function LoginPage() {
   const [documentType, setDocumentType] = useState<'CPF' | 'CNPJ'>('CPF');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [planType, setPlanType] = useState<'prepaid' | 'postpaid'>('prepaid');
+
   
   const [robotVisible, setRobotVisible] = useState(false);
   const { login } = useAuth();
@@ -24,7 +26,7 @@ export default function LoginPage() {
     setErrorMsg(null);
     setLoading(true);
     try {
-      await login(documentId.replace(/\D/g, ''), documentType);
+      await login(documentId.replace(/\D/g, ''), documentType, planType);
       navigate('/conversations');
     } catch (err: any) {
       setErrorMsg(err.response?.data?.error || 'Falha ao autenticar');
@@ -87,6 +89,9 @@ export default function LoginPage() {
             ))}
           </div>
 
+
+
+
           {/* Robô só aparece após clique */}
           {robotVisible && (
             <div className="flex justify-center mt-4 mb-2">
@@ -101,7 +106,18 @@ export default function LoginPage() {
             </div>
           )}
 
-
+<div className="flex justify-center gap-10 text-sm font-bold mt-2">
+  {(['prepaid', 'postpaid'] as const).map((type) => (
+    <button
+      key={type}
+      type="button"
+      onClick={() => setPlanType(type)}
+      className={`pb-1 ${planType === type ? 'border-b-2 border-black' : 'border-transparent'}`}
+    >
+      {type === 'prepaid' ? 'Pré-pago' : 'Pós-pago'}
+    </button>
+  ))}
+</div>
 
           {/* Mensagem de erro */}
           {errorMsg && (

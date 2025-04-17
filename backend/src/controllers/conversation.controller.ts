@@ -1,4 +1,3 @@
-// src/controllers/conversation.controller.ts
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 import { getClientConversations, getConversationMessages } from '../services/conversation.service';

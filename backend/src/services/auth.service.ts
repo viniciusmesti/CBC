@@ -18,38 +18,30 @@ export interface AuthResponse {
   };
 }
 
-export async function authenticateClient(
+// 🔧 Agora uma função pura, recebe os dados como argumentos
+export const authClient = async (
   documentId: string,
-  documentType: 'CPF' | 'CNPJ'
-): Promise<AuthResponse> {
-  console.log("🔑 authenticateClient()", { documentId, documentType });
+  documentType: 'CPF' | 'CNPJ',
+  planType: 'prepaid' | 'postpaid'
+): Promise<AuthResponse> => {
+  const clientRepo = AppDataSource.getRepository(Client);
 
-  try {
-    const clientRepo = AppDataSource.getRepository(Client);
+  let client = await clientRepo.findOneBy({ documentId });
 
-    let client = await clientRepo.findOneBy({ documentId, documentType });
-    console.log("🏷️  client found:", client);
-
-    if (!client) {
-      console.log("➕ Creating new client");
-      client = clientRepo.create({
-        name: 'Novo Cliente',
-        documentId,
-        documentType,
-        planType: 'prepaid',
-        active: true,
-        balance: 100.0,
-      });
-      client = await clientRepo.save(client);
-      console.log("💾 New client saved:", client);
-    }
-
-    const token = jwt.sign({ clientId: client.id }, JWT_SECRET, { expiresIn: '1h' });
-    console.log("🛡️  JWT generated:", token);
-
-    return { token, client };
-  } catch (err: any) {
-    console.error("❌ Error inside authenticateClient:", err);
-    throw err;  // propaga para o controller, que já imprime
+  if (!client) {
+    client = clientRepo.create({
+      name: 'Cliente ' + documentId,
+      documentId,
+      documentType,
+      planType,
+      active: true,
+      balance: planType === 'prepaid' ? 20.0 : undefined,
+      limit: planType === 'postpaid' ? 100.0 : undefined,
+    });
+    await clientRepo.save(client);
   }
-}
+
+  const token = jwt.sign({ clientId: client.id }, JWT_SECRET, { expiresIn: '7d' });
+
+  return { client, token };
+};

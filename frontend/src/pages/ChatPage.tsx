@@ -9,7 +9,7 @@ import MessageBubble from '../components/MessageBubble';
 export default function ChatPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { client } = useAuth();
+  const { client, setClient  } = useAuth();
 
   if (id === 'new') {
     navigate('/conversations');
@@ -19,6 +19,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newText, setNewText] = useState('');
   const [sending, setSending] = useState(false);
+  const [priority, setPriority] = useState<'normal' | 'urgent'>('normal');
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,6 +38,7 @@ export default function ChatPage() {
   function scrollToBottom() {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
   }
+  
 
   const handleSend = async () => {
     if (!newText.trim()) return;
@@ -45,10 +47,15 @@ export default function ChatPage() {
       const resp = await api.post<SendMessageResponse>('/messages', {
         conversationId: id!,
         content: newText,
-        priority: 'normal'
+        priority,
       });
-
-      setMessages(prev => [
+  
+      // Atualiza saldo após envio
+      if (resp.data.currentBalance !== undefined && client?.planType === 'prepaid') {
+        setClient({ ...client, balance: resp.data.currentBalance });
+      }
+  
+      setMessages((prev) => [
         ...prev,
         {
           id: resp.data.id,
@@ -56,13 +63,14 @@ export default function ChatPage() {
           content: newText,
           sentBy: { id: client!.id, type: 'client' },
           timestamp: resp.data.timestamp,
-          priority: 'normal',
+          priority,
           status: resp.data.status,
-          cost: resp.data.cost
-        }
+          cost: resp.data.cost,
+        },
       ]);
-
+  
       setNewText('');
+      setPriority('normal');
       scrollToBottom();
     } catch (error) {
       console.error(error);
@@ -70,40 +78,59 @@ export default function ChatPage() {
       setSending(false);
     }
   };
+  
 
   return (
     <div className="flex flex-col h-screen">
-      <header className="flex items-center p-4 bg-white shadow">
-        <button onClick={() => navigate('/conversations')} className="mr-4">←</button>
-        <h2 className="text-lg font-bold">Chat</h2>
-      </header>
+        <header className="flex items-center justify-between p-4 bg-white shadow">
+          <div className="flex items-center">
+            <button onClick={() => navigate('/conversations')} className="mr-4">
+              ←
+            </button>
+            <h2 className="text-lg font-bold">Chat</h2>
+          </div>
+          <div className="text-sm text-right">
+            {client?.planType === 'prepaid' ? (
+              <span>Saldo: <strong>R${client.balance?.toFixed(2)}</strong></span>
+            ) : (
+              <span>Limite: <strong>R${client.limit?.toFixed(2)}</strong></span>
+            )}
+          </div>
+        </header>
       <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
-        {messages.map(msg => (
-          <motion.div
-            key={msg.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <MessageBubble
-              message={msg}
-              isOwnMessage={msg.sentBy.id === client?.id}
-            />
+        {messages.map((msg) => (
+          <motion.div key={msg.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <MessageBubble message={msg} isOwnMessage={msg.sentBy.id === client?.id} />
           </motion.div>
         ))}
         <div ref={bottomRef} />
       </div>
-      <div className="p-4 bg-white flex">
+
+      <div className="p-4 bg-white flex items-center gap-2">
+        <select
+          className="border rounded-full px-3 py-2 bg-slate-200 focus:outline-none"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value as 'normal' | 'urgent')}
+        >
+          <option value="normal">Normal</option>
+          <option value="urgent">Urgente ⚠️</option>
+        </select>
+
         <input
           type="text"
           value={newText}
-          onChange={e => setNewText(e.target.value)}
-          className="flex-1 border rounded-full px-4 py-2 mr-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 bg-slate-300"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !sending) handleSend();
+          }}
+          onChange={(e) => setNewText(e.target.value)}
+          className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-cyan-400 bg-slate-300"
           placeholder="Digite sua mensagem..."
         />
+
         <button
           onClick={handleSend}
           disabled={sending}
-          className="bg-cyan-400 text-white rounded-full px-4 disabled:opacity-50"
+          className="bg-cyan-400 text-white rounded-full px-4 py-2 disabled:opacity-50"
         >
           Enviar
         </button>
