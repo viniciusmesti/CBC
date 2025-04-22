@@ -17,7 +17,7 @@ export async function getConversationMessages(
   clientId: string,
   conversationId: string
 ): Promise<Message[]> {
-  // Garante que a conversa pertence ao client antes de buscar mensagens
+
   const repo = AppDataSource.getRepository(Message);
 
   const messages = await repo

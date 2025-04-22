@@ -86,7 +86,7 @@ export async function sendMessage({
     sentBy: { id: clientId, type: 'client' },
     timestamp: new Date(),
     priority,
-    status: 'sent',
+    status: 'queued',
     cost,
   });
   const saved = await messageRepo.save(message);

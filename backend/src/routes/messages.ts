@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middleware/auth.middleware';
-import { sendMessageHandler } from '../controllers/message.controller'; // você deve ter isso implementado
+import { sendMessageHandler } from '../controllers/message.controller'; 
 
 const router = Router();
 

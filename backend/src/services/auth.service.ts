@@ -18,7 +18,6 @@ export interface AuthResponse {
   };
 }
 
-// 🔧 Agora uma função pura, recebe os dados como argumentos
 export const authClient = async (
   documentId: string,
   documentType: 'CPF' | 'CNPJ',

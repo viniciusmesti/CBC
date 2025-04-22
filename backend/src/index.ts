@@ -75,15 +75,16 @@ app.get('/', (req, res) => {
   res.send('Backend do CBC está funcionando!');
 });
 
-app.use('/api', authRoutes);
-app.use('/api', conversationRoutes);
-app.use('/api', messageRoutes);
-app.use('/api', transactionRoutes);
-
 
 AppDataSource.initialize()
   .then(() => {
     console.log('📦 Banco de dados conectado com sucesso!');
+
+    app.use('/api', authRoutes);
+    app.use('/api', conversationRoutes);
+    app.use('/api', messageRoutes);
+    app.use('/api', transactionRoutes);
+
     app.listen(PORT, () => {
       console.log(`Servidor rodando na porta ${PORT}`);
       console.log(`Swagger docs: http://localhost:${PORT}/api-docs`);

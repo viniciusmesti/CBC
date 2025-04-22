@@ -24,10 +24,10 @@ export class Client {
   active!: boolean;
 
   @Column('float', { nullable: true })
-  balance?: number; // Disponível para clientes no plano pré-pago
+  balance?: number; 
 
   @Column('float', { nullable: true })
-  limit?: number;   // Disponível para clientes no plano pós-pago
+  limit?: number;   
 
   @OneToMany(() => Conversation, conversation => conversation.client)
   conversations!: Conversation[];

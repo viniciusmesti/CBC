@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { Conversation } from '../types/index';
@@ -59,6 +59,14 @@ export default function ConversationsPage() {
             <span>Limite: <strong>R${client.limit?.toFixed(2)}</strong></span>
           )}
         </div>
+        <Link
+          to="/transactions"
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition"
+        >
+          Ver histórico
+        </Link>
+
+
       </header>
 
       <div className="mb-4">

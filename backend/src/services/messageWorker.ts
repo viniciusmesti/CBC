@@ -14,6 +14,12 @@ export async function startMessageWorker() {
       return;
     }
 
+
+    message.status = 'processing';
+    await messageRepo.save(message);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // Simula envio
     message.status = 'sent';
     await messageRepo.save(message);
